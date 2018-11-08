@@ -1,0 +1,161 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namingPrefix": {
+            "type": "string"
+        },
+        "vnetCIDR": {
+            "type": "string"
+        },
+        "subnetNames": {
+            "type": "array"
+        },
+        "subnetCIDRs": {
+            "type": "array"
+        },
+        "location": {
+            "type": "string"
+        },
+        "publicCertName": {
+            "type": "string"
+        },
+        "publicCertData": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "defaultTags": {
+            "Owner": "bebattis",
+            "Project": "p2snetwork"
+        },
+        "vaultName": "[concat(parameters('namingPrefix'),'-vault')]",
+        "vnetName": "[concat(parameters('namingPrefix'),'-vnet')]",
+        "gatewayName": "[concat(parameters('namingPrefix'),'-gw')]",
+        "gatewaySku": {
+            "name": "VpnGw1",
+            "tier": "VpnGw1",
+            "capacity": 1
+        },
+        "pipName": "[concat(parameters('namingPrefix'),'-pip')]",
+        "pipSku": "Standard"
+    },
+    "resources": [
+        {
+            "name": "[variables('vaultName')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2018-02-14",
+            "location": "[parameters('location')]",
+            "tags": "[variables('defaultTags')]",
+            "properties": {
+                "tenantId": "[subscription().TenantId]",
+                "sku": {
+                    "family": "A",
+                    "name": "Standard"
+                },
+                "enabledForDeployment": true,
+                "enabledForDiskEncryption": true,
+                "enabledForTemplateDeployment": true,
+                "enableSoftDelete": true,
+                "enablePurgeProtection": false
+            },
+            "resources": [
+                {
+                    "name": "[parameters('publicCertName')]",
+                    "type": "Microsoft.KeyVault/vaults/secrets",
+                    "apiVersion": "2018-02-14",
+                    "properties": {
+                      "value": "[parameters('publicCertData')]",
+                      "attributes": {
+                        "enabled": true
+                      }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[variables('vnetName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "tags": "[variables('defaultTags')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetCIDR')]"
+                    ]
+                },
+                "copy": {
+                    "name": "subnets",
+                    "count": "[length(parameters('subnetNames'))]",
+                    "input": {
+                        "name": "[parameters('subnetNames')[copyIndex('subnets')]]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetCIDRs')[copyIndex('subnets')]]"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('pipName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "tags": "[variables('defaultTags')]",
+            "sku": {
+                "name": "[variables('pipSku')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+        {
+            "name": "[variables('gatewayName')]",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "tags": "[variables('defaultTags')]",
+            "dependsOn": [
+                "[variables('vnetName')]",
+                "[variables('pipName')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "vnetGatewayConfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('vnetName'),'GatewaySubnet')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses',variables('pipName'))]"
+                            }
+                        }
+                    }
+                ],
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "enableBgp": false,
+                "activeActive": false,
+                "sku": "[variables('gatewaySku')]",
+                "vpnClientConfiguration": {
+                    "vpnClientRootCertificates": [
+                        {
+                            "name": "[parameters('publicCertName')]",
+                            "properties": {
+                                "publicCertData": "[parameters('publicCertData')]"
+                            }
+                        }
+                    ],
+                    "vpnClientProtocols": [
+                        "SSTP",
+                        "IkeV2"
+                    ]
+                }
+            }
+        }
+    ]
+}

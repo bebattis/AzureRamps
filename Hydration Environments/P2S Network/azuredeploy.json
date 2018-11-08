@@ -38,7 +38,7 @@
             "capacity": 1
         },
         "pipName": "[concat(parameters('namingPrefix'),'-pip')]",
-        "pipSku": "Standard"
+        "pipSku": "Basic"
     },
     "resources": [
         {
@@ -53,22 +53,25 @@
                     "family": "A",
                     "name": "Standard"
                 },
+                "accessPolicies": [],
                 "enabledForDeployment": true,
                 "enabledForDiskEncryption": true,
                 "enabledForTemplateDeployment": true,
-                "enableSoftDelete": true,
-                "enablePurgeProtection": false
+                "enableSoftDelete": true
             },
             "resources": [
                 {
                     "name": "[parameters('publicCertName')]",
-                    "type": "Microsoft.KeyVault/vaults/secrets",
+                    "type": "secrets",
                     "apiVersion": "2018-02-14",
+                    "dependsOn": [
+                        "[variables('vaultName')]"
+                    ],
                     "properties": {
-                      "value": "[parameters('publicCertData')]",
-                      "attributes": {
-                        "enabled": true
-                      }
+                        "value": "[parameters('publicCertData')]",
+                        "attributes": {
+                            "enabled": true
+                        }
                     }
                 }
             ]
@@ -85,7 +88,7 @@
                         "[parameters('vnetCIDR')]"
                     ]
                 },
-                "copy": {
+                "copy": [{
                     "name": "subnets",
                     "count": "[length(parameters('subnetNames'))]",
                     "input": {
@@ -94,7 +97,7 @@
                             "addressPrefix": "[parameters('subnetCIDRs')[copyIndex('subnets')]]"
                         }
                     }
-                }
+                }]
             }
         },
         {
@@ -107,7 +110,7 @@
                 "name": "[variables('pipSku')]"
             },
             "properties": {
-                "publicIPAllocationMethod": "Static",
+                "publicIPAllocationMethod": "Dynamic",
                 "publicIPAddressVersion": "IPv4"
             }
         },

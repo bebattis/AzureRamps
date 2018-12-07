@@ -1,0 +1,10 @@
+{
+    "comment": "This file should contain the appropriate information to construct the naming convention policies for Azure Resources.",
+    "EnforcedResources": [
+        "ResourceGroups",
+        "VirtualMachines",
+        "VirtualMachineScaleSets",
+        ""
+    ]
+
+}

@@ -23,21 +23,45 @@
     },
     "variables": {
         "artifacts": {
-            "baseURL": "https://raw.githubusercontent.com/",
-            "accountURL": "",
-            "tagsURL": "",
-            "omsURL": ""
+            "baseURL": "https://raw.githubusercontent.com/bebattis/AzureRamps/master/Hydration%20Environments/HRWScaleSet/",
+            "accountURL": "[concat(variables('artifacts').baseURL,'automationAccount.json')]",
+            "tagsURL": "[concat(variables('artifacts').baseURL,'automationTags.json')]",
+            "omsURL": "[concat(variables('artifacts').baseURL,'automationOMS.json')]"
         }
     },
     "resources": [
         {
             "apiVersion": "2017-05-10",
-            "name": "AccountTemplate",
+            "name": "accountTemplate",
             "type": "Microsoft.Resource/deployments",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": ""
+                    "uri": "[variables('artifacts').accountURL]"
+                },
+                "parameters": {
+                    "automationAccountName": "[parameters('automationAccountName')]",
+                    "location": "[parameters('location')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "tagsTemplate",
+            "type": "Microsoft.Resource/deployments",
+            "dependsOn": [
+                "AccountTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('artifacts').tagsURL]"
+                },
+                "parameters": {
+                    "automationAccountName": "[parameters('automationAccountName')]",
+                    "location": "[parameters('location')]",
+                    "tags": "[parameters('tags')]",
+                    "creationTime": "[reference('accountTemplate').outputs.creationTime.value]"
                 }
             }
         }

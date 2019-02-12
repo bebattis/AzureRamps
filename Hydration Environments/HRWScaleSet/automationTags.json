@@ -1,0 +1,56 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "automationAccountName": {
+            "type": "string",
+            "metadata": {
+                 "description": "The Name of the Azure Automation Account."
+             }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of the Azure Automation Account."
+            }
+        },
+        "tags": {
+           "type": "object",
+           "metadata": {
+                "description": "The list of tags for the Azure Automation Account."
+            }
+        },
+        "creationTime": {
+            "type": "string",
+            "metadata": {
+                "description": "The creation time of the resource."
+            }
+        }
+    },
+    "variables": {
+        "defaultTags": {
+            "Type": "AutomationAccount"
+        },
+        "creationTag": {
+            "CreatedOn": "[concat(parameters('creationTime'),' UTC')]"
+        },
+        "tags": "[union(variables('defaultTags'),parameters('tags'),variables('creationTag'))]",
+        "sku": {
+            "name": "Basic",
+            "family": null,
+            "capacity": null
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Automation/automationAccounts",
+            "apiVersion": "2015-10-31",
+            "name": "[parameters('automationAccountName')]",
+            "location": "[parameters('location')]",
+            "tags": "[variables('tags')]",
+            "properties": {
+                "sku": "[variables('sku')]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "automationAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Azure Automation Account to be deployed."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location to deploy this Automation Account to."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags to add to the Automation Account."
+            }
+        }
+    },
+    "variables": {
+        "artifacts": {
+            "baseURL": "https://raw.githubusercontent.com/",
+            "accountURL": "",
+            "tagsURL": "",
+            "omsURL": ""
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "AccountTemplate",
+            "type": "Microsoft.Resource/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": ""
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

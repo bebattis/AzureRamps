@@ -22,17 +22,17 @@
         }
     },
     "variables": {
-            "baseURL": "https://raw.githubusercontent.com/bebattis/AzureRamps/master/Hydration%20Environments/HRWScaleSet/",
-            "accountURL": "[concat(variables('baseURL'),'automationAccount.json')]",
-            "tagsURL": "[concat(variables('baseURL'),'automationTags.json')]",
-            "omsURL": "[concat(variables('baseURL'),'automationOMS.json')]"
+        "baseURL": "https://raw.githubusercontent.com/bebattis/AzureRamps/master/Hydration%20Environments/HRWScaleSet/",
+        "accountURL": "[concat(variables('baseURL'),'automationAccount.json')]",
+        "tagsURL": "[concat(variables('baseURL'),'automationTags.json')]",
+        "omsURL": "[concat(variables('baseURL'),'automationOMS.json')]"
       
     },
     "resources": [
         {
             "apiVersion": "2017-05-10",
             "name": "accountTemplate",
-            "type": "Microsoft.Resource/deployments",
+            "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -47,7 +47,7 @@
         {
             "apiVersion": "2017-05-10",
             "name": "tagsTemplate",
-            "type": "Microsoft.Resource/deployments",
+            "type": "Microsoft.Resources/deployments",
             "dependsOn": [
                 "AccountTemplate"
             ],

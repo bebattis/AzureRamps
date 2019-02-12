@@ -39,8 +39,12 @@
                     "uri": "[variables('accountURL')]"
                 },
                 "parameters": {
-                    "automationAccountName": "[parameters('automationAccountName')]",
-                    "location": "[parameters('location')]"
+                    "automationAccountName": {
+                        "value": "[parameters('automationAccountName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    }
                 }
             }
         },
@@ -57,10 +61,18 @@
                     "uri": "[variables('tagsURL')]"
                 },
                 "parameters": {
-                    "automationAccountName": "[parameters('automationAccountName')]",
-                    "location": "[parameters('location')]",
-                    "tags": "[parameters('tags')]",
-                    "creationTime": "[reference('accountTemplate').outputs.creationTime.value]"
+                    "automationAccountName": {
+                        "value": "[parameters('automationAccountName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "creationTime": {
+                        "value": "[reference('accountTemplate').outputs.creationTime.value]"
+                    }
                 }
             }
         }

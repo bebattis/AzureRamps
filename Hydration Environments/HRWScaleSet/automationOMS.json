@@ -1,0 +1,90 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Log Analytics workspace to deploy."
+            }
+        },
+        "automationAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Automation Account to associate this workspace to."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location to deploy the Log Analytics workspace to."
+            }
+        },
+        "enabledSolutions": {
+            "type": "array",
+            "metadata": {
+                "description": "List of Azure Monitor Solutions to enable for this Workspace"
+            }
+        }
+    },
+    "variables": {
+        "allowedSolutions": [
+            "Security",
+            "AgentHealthAssessment",
+            "ChangeTracking",
+            "Updates",
+            "AzureActivity",
+            "AzureAutomation",
+            "ADAssessment",
+            "SQLAssessment"
+        ],
+        "deploySolutions": "[intersection(parameters('enabledSolutions'),variables('allowedSolutions'))]",
+        "skuName": "pergb2018",
+        "retentionInDays": 30
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-03-15-preview",
+            "location": "[parameters('location')]",
+            "name": "[parameters('workspaceName')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "properties": {
+                "sku": {
+                    "name": "[variables('skuName')]"
+                },
+                "retentionInDays": "[variables('retentionInDays')]"
+            }
+        },
+        {
+            "apiVersion": "2015-11-01-preview",
+            "type": "Microsoft.OperationsManagement/solutions",
+            "name": "[concat(variables('deploySolutions')[copyIndex()],'(',parameters('workspaceName'),')')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+            ],
+            "copy": {
+                "name": "solutionCopy",
+                "count": "[length(variables('deploySolutions'))]"
+            },
+            "properties": {
+                "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+            },
+            "plan": {
+                "name": "[concat(variables('deploySolutions')[copyIndex()],'(',parameters('workspaceName'),')')]",
+                "product": "[concat('OMSGallery/', variables('deploySolutions')[copyIndex()])]",
+                "promotionCode": "",
+                "publisher": "Microsoft"
+            }
+        },
+        {
+            "name": "[concat(parameters('workspaceName'),'/linkedWorkspace')]",
+            "type": "Microsoft.OperationalInsights/workspaces/linkedServices",
+            "apiVersion": "2015-11-01-preview",
+            "properties": {
+                "resourceId": "[resourceId('Microsoft.Automation/automationAccounts',parameters('automationAccountName'))]"
+            }
+          }
+    ],
+    "outputs": {}
+}

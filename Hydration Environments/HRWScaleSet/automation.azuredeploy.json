@@ -2,10 +2,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "automationAccountName": {
+        "appPrefix": {
             "type": "string",
             "metadata": {
-                "description": "The name of the Azure Automation Account to be deployed."
+                "description": "The prefix to leverage for this automation account app."
             }
         },
         "location": {
@@ -25,8 +25,14 @@
         "baseURL": "https://raw.githubusercontent.com/bebattis/AzureRamps/master/Hydration%20Environments/HRWScaleSet/",
         "accountURL": "[concat(variables('baseURL'),'automationAccount.json')]",
         "tagsURL": "[concat(variables('baseURL'),'automationTags.json')]",
-        "omsURL": "[concat(variables('baseURL'),'automationOMS.json')]"
-      
+        "omsURL": "[concat(variables('baseURL'),'automationOMS.json')]",
+        "accName": "[concat(parameters('appPrefix'),'-account')]",
+        "workspaceName": "[concat(parameters('appPrefix'),'-workspace')]",
+        "enabledSolutions": [
+            "AzureAutomation",
+            "ChangeTracking",
+            "Updates"
+        ]
     },
     "resources": [
         {
@@ -40,7 +46,7 @@
                 },
                 "parameters": {
                     "automationAccountName": {
-                        "value": "[parameters('automationAccountName')]"
+                        "value": "[variables('accName')]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -53,7 +59,7 @@
             "name": "tagsTemplate",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "AccountTemplate"
+                "accountTemplate"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -62,7 +68,7 @@
                 },
                 "parameters": {
                     "automationAccountName": {
-                        "value": "[parameters('automationAccountName')]"
+                        "value": "[variables('accName')]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -72,6 +78,34 @@
                     },
                     "creationTime": {
                         "value": "[reference('accountTemplate').outputs.creationTime.value]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "omsTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "accountTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('omsURL')]"
+                },
+                "parameters": {
+                    "workspaceName": {
+                        "value": "[variables('workspaceName')]"
+                    },
+                    "automationAccountName": {
+                        "value": "[variables('accName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "enabledSolutions": {
+                        "value": "[variables('enabledSolutions')]"
                     }
                 }
             }

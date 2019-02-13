@@ -39,7 +39,7 @@
             "SQLAssessment"
         ],
         "deploySolutions": "[intersection(parameters('enabledSolutions'),variables('allowedSolutions'))]",
-        "skuName": "pergb2018",
+        "skuName": "Standalone",
         "retentionInDays": 30
     },
     "resources": [

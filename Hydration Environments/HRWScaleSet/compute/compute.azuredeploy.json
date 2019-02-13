@@ -3,21 +3,33 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "appPrefix": {
-           "type": "string",
-           "metadata": {
+            "type": "string",
+            "metadata": {
                 "description": "Prefix for naming for this Application."
             }
         },
         "location": {
             "type": "string",
             "metadata": {
-                "description": "The location to deploy this Automation Account to."
+                "description": "The location to deploy these Compute Resources to."
             }
         },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                 "description": "Sign-in name for VMs in the Scale Set."
+             }
+         },
+         "adminPassword": {
+             "type": "securestring",
+             "metadata": {
+                 "description": "Secure password for VMs in the Scale Set."
+             }
+         },
         "tags": {
             "type": "object",
             "metadata": {
-                "description": "The tags to add to the Automation Account."
+                "description": "The tags to add to the Compute Resources."
             }
         }
     },
@@ -36,7 +48,8 @@
                 "10.1.2.0/25",
                 "10.1.2.128/25"
             ]
-        }
+        },
+        "appSubnet": "subnet-10.1.2.0_25"
     },
     "resources": [
         {
@@ -66,7 +79,44 @@
                     }
                 }
             }
-        }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "networkTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "networkTemplate"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vmssURL')]"
+                },
+                "parameters": {
+                    "vmssPrefix": {
+                        "value": "[parameters('appPrefix')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "vnetName": {
+                        "value": "[variables('networkName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('appSubnet')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    }
+                }
+            }
+        }        
     ],
     "outputs": {}
 }

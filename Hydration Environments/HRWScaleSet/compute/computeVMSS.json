@@ -127,8 +127,7 @@
                     }
                 },
                 "overprovision": false,
-                "singlePlacementGroup": true,
-                "zoneBalance": false
+                "singlePlacementGroup": true
             }
         }
     ],

@@ -38,6 +38,10 @@
             "type": "string",
             "value": "[reference(concat('Microsoft.Automation/automationAccounts/',parameters('automationAccountName')),'2015-10-31','Full').properties.RegistrationUrl]"
         },
+        "RegistrationKey": {
+            "type": "securestring",
+            "value": "[listKeys('Microsoft.Automation/automationAccounts/b001-prod-account','2015-10-31').keys[0].Value]"
+        },
         "creationTime": {
             "type": "string",
             "value": "[reference(concat('Microsoft.Automation/automationAccounts/',parameters('automationAccountName')),'2015-10-31','Full').properties.creationTime]"

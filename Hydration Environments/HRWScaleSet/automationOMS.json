@@ -91,5 +91,10 @@
             }
           }
     ],
-    "outputs": {}
+    "outputs": {
+        "workspaceKey": {
+            "type": "securestring",
+            "value": "[listKeys('Microsoft.OperationalInsights/workspaces/b001-prod-workspace','2017-03-15-preview').primarySharedKey]"
+        }
+    }
 }

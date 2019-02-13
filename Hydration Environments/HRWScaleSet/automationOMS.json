@@ -39,7 +39,7 @@
             "SQLAssessment"
         ],
         "deploySolutions": "[intersection(parameters('enabledSolutions'),variables('allowedSolutions'))]",
-        "skuName": "Standalone",
+        "skuName": "Free",
         "retentionInDays": 30
     },
     "resources": [

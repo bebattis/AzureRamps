@@ -22,7 +22,7 @@
         }
     },
     "variables": {
-        "baseURL": "https://raw.githubusercontent.com/bebattis/AzureRamps/master/Hydration%20Environments/HRWScaleSet/",
+        "baseURL": "https://raw.githubusercontent.com/bebattis/AzureRamps/master/Hydration%20Environments/HRWScaleSet/automation/",
         "accountURL": "[concat(variables('baseURL'),'automationAccount.json')]",
         "tagsURL": "[concat(variables('baseURL'),'automationTags.json')]",
         "omsURL": "[concat(variables('baseURL'),'automationOMS.json')]",
@@ -111,5 +111,18 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "registrationURL": {
+            "type": "string",
+            "value": "[reference('accountTemplate').outputs.RegistrationURL.value]"
+        },
+        "registrationKey": {
+            "type": "securestring",
+            "value": "[reference('accountTemplate').outputs.RegistrationKey.value]"
+        },
+        "workspaceKey": {
+            "type": "securestring",
+            "value": "[reference('omsTemplate').outputs.workspaceKey.value]"
+        }
+    }
 }

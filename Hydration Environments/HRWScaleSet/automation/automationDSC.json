@@ -3,10 +3,6 @@
     "contentVersion": "1.0.0.0",
     "parameters": {},
     "variables": {},
-    "resources": [
-        {}, // automation deployment
-        {}, // compute deployment
-        {} // config deployment
-    ],
+    "resources": [],
     "outputs": {}
 }

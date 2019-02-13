@@ -83,6 +83,9 @@
             "name": "[concat(parameters('workspaceName'),'/linkedWorkspace')]",
             "type": "Microsoft.OperationalInsights/workspaces/linkedServices",
             "apiVersion": "2015-11-01-preview",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+            ],
             "properties": {
                 "resourceId": "[resourceId('Microsoft.Automation/automationAccounts',parameters('automationAccountName'))]"
             }

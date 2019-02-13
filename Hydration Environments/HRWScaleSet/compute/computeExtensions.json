@@ -4,10 +4,5 @@
     "parameters": {},
     "variables": {},
     "resources": [],
-    "outputs": {
-        "test": {
-            "type": "object",
-            "value": "[reference('Microsoft.Automation/automationAccounts/b001-prod-account','2015-10-31')]"
-        }
-    }
+    "outputs": {}
 }

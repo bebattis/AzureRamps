@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appPrefix": {
+           "type": "string",
+           "metadata": {
+                "description": "Prefix for naming for this Application."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location to deploy this Automation Account to."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags to add to the Automation Account."
+            }
+        }
+    },
+    "variables": {
+        "baseURL": "https://raw.githubusercontent.com/bebattis/AzureRamps/master/Hydration%20Environments/HRWScaleSet/compute/",
+        "networkURL": "[concat(variables('baseURL'),'computeNetwork.json')]",
+        "vmssURL": "[concat(variables('baseURL'),'computeVMSS.json')]",
+        "extsURL": "[concat(variables('baseURL'),'computeExtensions.json')]",
+        "scaleURL": "[concat(variables('baseURL'),'computeScale.json')]",
+        "networkName": "[concat(parameters('appPrefix'),'-vnet')]",
+        "vmssName": "[concat(parameters('appPrefix'),'-vmss')]",
+        "network": {
+            "vnetCIDR": "10.1.0.0/16",
+            "subnetCIDRs": [
+                "10.1.1.0/24",
+                "10.1.2.0/25",
+                "10.1.2.128/25"
+            ]
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "networkTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('networkURL')]"
+                },
+                "parameters": {
+                    "vnetName": {
+                        "value": "[variables('networkName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "vnetCIDR": {
+                        "value": "[variables('network').vnetCIDR]"
+                    },
+                    "subnetCIDRs": {
+                        "value": "[variables('network').subnetCIDRs]"
+                    },
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

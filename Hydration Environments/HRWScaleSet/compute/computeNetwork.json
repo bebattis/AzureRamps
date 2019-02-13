@@ -1,0 +1,70 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the virtual network to deploy in Azure."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "The location for the Azrue Network."
+            }
+        },
+        "vnetCIDR": {
+           "type": "string",
+           "metadata": {
+                "description": "The CIDR Range for the Azure Network."
+            }
+        },
+        "subnetCIDRs": {
+            "type": "array",
+            "metadata": {
+                "description": "The list of CIDR Ranges for each subnet in the Azure Network."
+            }
+        },
+        "tags": {
+            "type": "object",
+            "metadata": {
+                "description": "The tags to append to this virtual network resource."
+            }
+        }
+    },
+    "variables": {
+        "defaultTags": {
+            "Type": "VirtualNetwork",
+            "AddressSpace": "[parameters('vnetCIDR')]"
+        },
+        "tags": "[union(parameters('tags'),variables('defaultTags'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('vnetName')]",
+            "location": "[parameters('location')]",
+            "apiVersion": "2018-11-01",
+            "tags": "[variables('tags')]",
+            "properties": {
+              "addressSpace": {
+                "addressPrefixes": [
+                  "[parameters('vnetCIDR')]"
+                ]
+              },
+              "copy": [{
+                  "name": "subnets",
+                  "count": "[length(parameters('subnetCIDRs'))]",
+                  "input": {
+                      "name": "[concat('subnet-',replace(parameters('subnetCIDRs')[copyIndex('subnets')],'/','_'))]",
+                      "properties": {
+                          "addressPrefix": "[parameters('subnetCIDRs')[copyIndex('subnets')]]"
+                      }
+                  }
+              }]
+            }
+          }
+    ],
+    "outputs": {}
+}

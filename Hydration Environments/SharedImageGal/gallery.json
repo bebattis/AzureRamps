@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "galleryName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the gallery to deploy."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westcentralus",
+            "metadata": {
+                "description": "The location to deploy the gallery to."
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('galleryName')]",
+            "type": "Microsoft.Compute/galleries",
+            "apiVersion": "2018-06-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "description": "Test gallery for automated golden image replication."
+            }
+        }
+    ]
+}

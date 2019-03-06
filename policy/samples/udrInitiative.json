@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "policyType": "custom",
+        "displayName": "Enforce Route Table",
+        "description": "This initiative combines both a default append policy as well as an enforcement of a specific UDR for a vnet's subnets. A whitelist is available to exclude subnets from this policy.",
+        "metadata": {
+            "Category": "Networking"
+        },
+        "parameters": {
+            "excludedSubnets": {
+                "type": "array",
+                "metadata": {
+                    "description": "An array containing the list of subnets which should be excluded from this assignment."
+                },
+                "defaultValue": [
+                    "gatewaySubnet"
+                ]
+            },
+            "udrId": {
+                "type": "string",
+                "metadata": {
+                    "description": "The resource id for the User Defined Routes/Route Table to be applied to the subnets."
+                }
+            }
+        },
+        "policyDefinitions": [
+            {
+                "policyDefinitionId": "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/providers/Microsoft.Authorization/policyDefinitions/defaultUDR",
+                "parameters": {
+                    "udrId": {
+                        "value": "[parameters('udrId')]"
+                    },
+                    "excludedSubnets": {
+                        "value": "[parameters('excludedSubnets')]"
+                    }
+                }
+            },
+            {
+                "policyDefinitionId": "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/providers/Microsoft.Authorization/policyDefinitions/enforceUDR",
+                "parameters": {
+                    "udrId": {
+                        "value": "[parameters('udrId')]"
+                    },
+                    "excludedSubnets": {
+                        "value": "[parameters('excludedSubnets')]"
+                    }
+                }
+            }
+        ]
+    }
+}

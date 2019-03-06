@@ -1,0 +1,50 @@
+{
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "apiVersion": "2018-05-01",
+    "name": "EnforceTagFromList",
+    "properties": {
+        "policyType": "Custom",
+        "mode": "Indexed",
+        "displayName": "Enforce a Tag from a List",
+        "description": "This policy allows you to specify a key and array of allow values for all resources.",
+        "policyRule": {
+            "if": {
+                "not": {
+                    "field": "[concat('tags[', parameters('tagName'), ']')]",
+                    "in": "[parameters('allowedTagValues')]"
+                }
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        },
+        "metadata": {
+            "category": "Tagging"
+        },
+        "parameters": {
+            "tagName": {
+                "type": "String",
+                "metadata": {
+                    "description": "Name of the tag, such as costCenter"
+                }
+            },
+            "allowedTagValues": {
+                "type": "Array",
+                "metadata": {
+                    "description": "List of values for the tag, such as 105562, 108320"
+                }
+            },
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "description": "The effect to apply to non-compliant resources."
+                },
+                "allowedValues": [
+                    "Deny",
+                    "Audit",
+                    "Disabled"
+                ]
+            }
+        }
+    }
+}

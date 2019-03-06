@@ -1,0 +1,43 @@
+{
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "apiVersion": "2018-05-01",
+    "name": "AppendDefaultTag",
+    "properties": {
+        "policyType": "Custom",
+        "mode": "Indexed",
+        "displayName": "Append a Default Tag",
+        "description": "This policy allows you to specify a key and default value for all resources.",
+        "policyRule": {
+            "if": {
+                "not": {
+                    "field": "[concat('tags[', parameters('tagName'), ']')]",
+                    "exists": true
+                }
+            },
+            "then": {
+                "effect": "Append",
+                "details": [{
+                    "field": "[concat('tags[', parameters('tagName'), ']')]",
+                    "value": "[parameters('defaultTagValue')]"
+                }]
+            }
+        },
+        "metadata": {
+            "category": "Tagging"
+        },
+        "parameters": {
+            "tagName": {
+                "type": "String",
+                "metadata": {
+                    "description": "Name of the tag, such as costCenter"
+                }
+            },
+            "defaultTagValue": {
+                "type": "String",
+                "metadata": {
+                    "description": "Default value for the tag, such as 105562"
+                }
+            }
+        }
+    }
+}

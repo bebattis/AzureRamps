@@ -1,0 +1,50 @@
+{
+    "properties": {
+        "policyRule": {
+            "if": {
+                "anyOf": [
+                    {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Network/virtualNetworks/subnets"
+                            },
+                            {
+                                "field": "name",
+                                "notin": "[parameters('excludedsubnets')]"
+                            },
+                            {
+                                "field": "Microsoft.Network/virtualNetworks/subnets/routeTable.id",
+                                "notequals": "[parameters('udrId')]"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        },
+        "parameters": {
+            "udrId": {
+                "type": "string",
+                "metadata": {
+                    "displayName": "UDR Id",
+                    "description": "Resource Id of the Route Table"
+                }
+            },
+            "excludedSubnets": {
+                "type": "Array",
+                "metadata": {
+                    "displayName": "List of excluded subnets",
+                    "description": "This is the list of excluded subnets"
+                },
+                "defaultValue": [
+                    "RouterSubnet",
+                    "GatewaySubnet",
+                    "AzureFirewallSubnet"
+                ]
+            }
+        }
+    }
+}

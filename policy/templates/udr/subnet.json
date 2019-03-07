@@ -1,0 +1,76 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": [
+        {
+            "name": "testvnet2",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-11-01",
+            "location": "westus2",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.31.0.0/16"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "testvnet2/Subnet1",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2018-11-01",
+            "location": "westus2",
+            "dependsOn": [
+                "testvnet2"
+            ],
+            "properties": {
+                "addressPrefix": "10.31.0.0/24",
+                "routeTable": {
+                    "id": "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/resourceGroups/testpolicy/providers/Microsoft.Network/routeTables/testUDR"
+                }
+            }
+        },
+        {
+            "name": "testvnet2/Subnet2",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2018-11-01",
+            "location": "westus2",
+            "dependsOn": [
+                "testvnet2"
+            ],
+            "properties": {
+                "addressPrefix": "10.31.1.0/24"
+            }
+        },
+        {
+            "name": "testvnet2/Subnet3",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2018-11-01",
+            "location": "westus2",
+            "dependsOn": [
+                "testvnet2"
+            ],
+            "properties": {
+                "addressPrefix": "10.31.2.0/24",
+                "routeTable": {
+                    "id": "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/resourceGroups/testpolicy/providers/Microsoft.Network/routeTables/testUDR"
+                }
+            }
+        },
+        {
+            "name": "testvnet2/Subnet4",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2018-11-01",
+            "location": "westus2",
+            "dependsOn": [
+                "testvnet2"
+            ],
+            "properties": {
+                "addressPrefix": "10.31.3.0/24"
+            }
+        }
+    ],
+    "outputs": {}
+}

@@ -7,7 +7,7 @@
     "outputs": {
         "test": {
             "type": "object",
-            "value": "[reference('Microsoft.Automation/automationAccounts/b001-prod-account','2015-10-31')]"
+            "value": "[reference('Microsoft.Network/virtualNetworks/b001-prod-vnet','2018-11-01','Full')]"
         }
     }
 }

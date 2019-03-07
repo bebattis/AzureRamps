@@ -1,30 +1,28 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "galleryName": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the gallery to deploy."
-            }
-        },
-        "location": {
-            "type": "string",
-            "metadata": {
-                "description": "The location to deploy the gallery to."
-            }
-        }
-    },
+    "parameters": {},
     "variables": {},
     "resources": [
         {
-            "name": "[parameters('galleryName')]",
-            "type": "Microsoft.Compute/galleries",
-            "apiVersion": "2018-06-01",
-            "location": "[parameters('location')]",
+            "name": "goldenImage",
+            "type": "Microsoft.Compute/images",
+            "apiVersion": "2018-10-01",
+            "location": "westus2",
+            "tags": {},
             "properties": {
-                "description": "Test gallery for automated golden image replication."
+              "storageProfile": {
+                "osDisk": {
+                  "osType": "Windows",
+                  "osState": "Generalized",
+                  "managedDisk": {
+                    "id": "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/resourceGroups/b001-shdimggal/providers/Microsoft.Compute/disks/golden-box_OsDisk_1_c20dc9587d064f8e8f1f00ca1a48c5fc"
+                  },
+                  "diskSizeGB": 127,
+                  "storageAccountType": "Premium_LRS"
+                }
+              }
             }
-        }
+          }
     ]
 }

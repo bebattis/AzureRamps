@@ -1,0 +1,51 @@
+# Create Temp Resource Group
+az group create --name 'temp-artifacts-rg' --location 'eastus' --tags 'find=delete'
+
+# Identify Managed Disk Id to Snaphot
+# NEED TO FIGURE OUT PYTHON TO GET THIS VALUE THEN CREATE A SNAPSHOT COPY
+/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/resourceGroups/b001-cliextension/providers/Microsoft.Compute/disks/testbox_OsDisk_1_7d542d5b4c6d422d9fdb5560d7240ec9
+
+# Create Snapshot of Disk, which will be copied to multiple regions ## DO WE NEED TO SHUT DOWN THE VIRTUAL MACHINE
+az snapshot create --name 'temp-snapshot-to-copy' --resource-group 'temp-artifacts-rg' --location 'westus2' --sku Standard_LRS --source '/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/resourceGroups/b001-cliextension/providers/Microsoft.Compute/disks/testbox_OsDisk_1_7d542d5b4c6d422d9fdb5560d7240ec9'
+
+# Get Snapshot SAS URL
+az snapshot grant-access --name 'temp-snapshot-to-copy' --resource-group 'temp-artifacts-rg' --duration-in-seconds '3600'
+
+access_SAS = "https://md-bm1f23wxjckh.blob.core.windows.net/rrv4dm2qcclf/abcd?sv=2017-04-17&sr=b&si=6e08afa1-5488-488d-a5ee-7daeac6c7eac&sig=RiTh62CN19%2BBjKheboRv9qLuu80KD%2FI8qn%2FPO%2BDU93I%3D"
+
+# Create temp storage account in target region(s)
+az storage account create --name '141093413049512381eastus' --resource-group 'temp-artifacts-rg' --location 'eastus' --sku 'Standard_LRS'
+
+# NEED TO GET OUTPUT FOR THE Standard_LRS
+# Get Key
+az storage account keys list --account-name '141093413049512381eastus' --resource-group 'temp-artifacts-rg'
+
+576da0gpJx4UHSLCKXP5SekR6z01IT7+6qd3huy5ogEMK8atFcEKn7/k079PeW3zT01MozVu70QuuLDkzGjYFQ==
+
+# Generate SAS token 
+end=`date -d "60 minutes" '+%Y-%m-%dT%H:%MZ'`
+az storage account generate-sas --account-name '141093413049512381eastus' --account-key '576da0gpJx4UHSLCKXP5SekR6z01IT7+6qd3huy5ogEMK8atFcEKn7/k079PeW3zT01MozVu70QuuLDkzGjYFQ==' --expiry $end --permissions 'aclrpuw' --resource-types 'sco' --services 'b' --https-only
+
+#token
+se=2019-03-06T04%3A59Z&sp=rwlacup&spr=https&sv=2018-03-28&ss=b&srt=sco&sig=ZW%2BOzUUiWyO2YEtTiSCxItmKySm9ELdRMWWhco5lJyA%3D
+
+# create temp snapshots container
+az storage container create --name 'snapshots' --account-name '141093413049512381eastus'
+
+# copy the snapshot
+az storage blob copy start --source-snapshot 'temp-snapshot-to-copy' --destination-blob 'temp-snapshot-to-copy.vhd' --destination-container 'snapshots' --account-name '141093413049512381eastus' --sas-token 'se=2019-03-06T04%3A59Z&sp=rwlacup&spr=https&sv=2018-03-28&ss=b&srt=sco&sig=ZW%2BOzUUiWyO2YEtTiSCxItmKySm9ELdRMWWhco5lJyA%3D'
+
+# WAIT THIS IS AN ASYNCHRONOUS PROCESS 
+# Started at 7:24 PM PST for westus2 to eastus COPY
+# 27% Progress at 7:37 PM PST
+# 33% Progress at 7:40 PM PST
+# DONE at 7:41 PM PST
+az storage blob show --name 'temp-snapshot-to-copy.vhd' --container-name 'snapshots' --account-name '141093413049512381eastus'
+
+# create the final snapshot in a target rg
+az snapshot create --resource-group 'b001-eastus-demo' --name 'eastus-gold-latest' --location 'eastus' --sku Premium_LRS --source https://141093413049512381eastus.blob.core.windows.net/snapshots/temp-snapshot-to-copy.vhd
+
+### TIME TO GO CLEAN THINGS UP ###
+
+### When we need to create this virtual machine ###
+1) create disk from the snapshot `az disk create --resource-group b001-eastus-demo --name demoReplica-OSDisk --source 'eastus-gold-latest' --location 'eastus'

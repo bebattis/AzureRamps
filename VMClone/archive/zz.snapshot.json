@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "diskName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual machine to snapshot."
+      }
+    },
+    "snapshotName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the snapshot to create."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The location to deploy the snapshot into."
+      }
+    }
+  },
+  "variables": {
+    "skuName": "Standard_LRS",
+    "osType": "Windows",
+    "diskRef": "[resourceId('Microsoft.Compute/disks', parameters('diskName'))]"
+  },
+  "resources": [
+    {
+      "name": "[parameters('snapshotName')]",
+      "type": "Microsoft.Compute/snapshots",
+      "apiVersion": "2018-06-01",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[variables('skuName')]"
+      },
+      "properties": {
+        "osType": "[variables('osType')]",
+        "creationData": {
+          "createOption": "Copy",
+          "sourceResourceId": "[variables('diskRef')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

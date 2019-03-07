@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": [
+        {
+            "name": "imageFromDisk",
+            "type": "Microsoft.Compute/images",
+            "apiVersion": "2018-10-01",
+            "location": "westus2",
+            "tags": {},
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "osType": "Windows",
+                        "osState": "Generalized",
+                        "managedDisk": {
+                            "id": "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/resourceGroups/b001-cliextension/providers/Microsoft.Compute/disks/temp-disk-for-image"
+                        },
+                        "caching": "ReadWrite"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

@@ -1,16 +1,17 @@
 #!/bin/bash
 # Setup Preliminary Info
 src_location='westus2'
-src_rg_name='b001-cliextension'
-src_vm_name='testbox'
+src_rg_name='my-source-rg'
+src_vm_name='my-golden-vm'
 dst_location='eastus'
-dst_rg_name='b001-cliextension2'
-dst_snap_name='goldenSnap2-eastus'
+dst_rg_name='my-eastus-demo-rg'
+dst_snap_name='my-snapshot-name'
 
-tmp_rg_name='temp-migrate-rg2'
-src_snap_name='test-snapshot-2'
+tmp_rg_name='temp-migrate-rg'
+src_snap_name='temp-snapshot'
 copy_time=3600
 container_name='snapshots'
+storage_sku='Standard_LRS'
 blob_name="$src_snap_name.vhd"
 
 
@@ -21,7 +22,7 @@ uuid=$(head /dev/urandom | tr -dc a-z0-9 | head -c $rand_len)
 sta_name="$dst_location$uuid"
 
 # Create temp rg
-az group create --name $tmp_rg_name --location $dst_location --tags 'delete=me'
+az group create --name $tmp_rg_name --location $dst_location
 
 # Create snapshot
 vm_obj=`az vm show -g $src_rg_name -n $src_vm_name`
@@ -33,7 +34,7 @@ snap_url=`az snapshot grant-access --name $src_snap_name --resource-group $tmp_r
 snap_url=$(echo $snap_url | /usr/bin/jq --raw-output '.accessSas')
 
 # Create storage account/container in target region
-az storage account create --name $sta_name --resource-group $tmp_rg_name --location $dst_location --sku Standard_LRS
+az storage account create --name $sta_name --resource-group $tmp_rg_name --location $dst_location --sku $storage_sku
 az storage container create --name $container_name --account-name $sta_name
 
 # Get Storage Key and Generate SAS Token
@@ -53,8 +54,8 @@ az storage blob show --name $blob_name --container-name $container_name --accoun
 # Create Snapshot in regional rg
 snap_vhd_uri=`az storage blob url --name $blob_name --container-name $container_name --account-name $sta_name`
 snap_vhd_uri=$(echo $snap_vhd_uri | tr -d '"')
-az snapshot create --resource-group $dst_rg_name --name $dst_snap_name --location $dst_location --sku Standard_LRS --source $snap_vhd_uri
+az snapshot create --resource-group $dst_rg_name --name $dst_snap_name --location $dst_location --sku $storage_sku --source $snap_vhd_uri
 
 # We will then use the snapshot to create a disk, and attach a disk to the VM during creation time. We can also deploy both these through a template based approach for consistency and customization.
-az disk create --resource-group $dst_rg_name --name 'test-osdisk' --source 'goldenSnap2-eastus' --location 'eastus'
-az vm create --resource-group $dst_rg_name --name 'myreplicavm' --attach-os-disk 'test-osdisk' --os-type Windows
+az disk create --resource-group $dst_rg_name --name <my-disk-name> --source $dst_snap_name --location $dst_location
+az vm create --resource-group $dst_rg_name --name <replica-vm-name> --attach-os-disk <my-disk-name> --os-type Windows

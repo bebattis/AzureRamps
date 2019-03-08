@@ -1,5 +1,15 @@
 {
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "apiVersion": "2018-05-01",
+  "name": "DeployResourceGroupRBAC",
+  "properties": {
+    "policyType": "Custom",
     "mode": "all",
+    "displayName": "Deploy RBAC on RGs",
+    "description": "This policy will deploy a Role Assignment for a User/Group/SPN to resource groups in scope.",
+    "metadata": {
+      "category": "RBAC"
+    },
     "policyRule": {
       "if": {
         "field": "type",
@@ -85,3 +95,4 @@
       }
     }
   }
+}

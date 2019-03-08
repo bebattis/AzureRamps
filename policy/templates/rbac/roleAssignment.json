@@ -1,0 +1,29 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {
+        "definitionIDs": {
+            "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+            "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+            "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]"
+        },
+        "principalIDs": {
+            "me": "aab3efee-c27c-425c-8d9e-3908d7bd00ed",
+            "spn": "865f5d03-9faa-4c04-986e-20a65c50cf1d"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "name": "[guid('hello')]",
+            "apiVersion": "2017-10-01-preview",
+            "properties": {
+                "roleDefinitionId": "[variables('definitionIDs').Contributor]",
+                "principalId": "[variables('principalIDs').me]",
+                "scope": "[resourceGroup().id]"
+            }
+        }
+    ],
+    "outputs": {}
+}

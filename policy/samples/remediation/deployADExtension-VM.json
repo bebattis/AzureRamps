@@ -47,21 +47,29 @@
                   "location": {
                     "type": "string"
                   },
+                  "domainFQDN": {
+                    "type": "string"
+                  },
+                  "domainJoinUser": {
+                    "type": "string"
+                  },
                   "domainJoinSecret": {
                     "type": "securestring"
+                  },
+                  "domainJoinOptions": {
+                    "type": "int",
+                    "defaultValue": 3
                   }
                 },
                 "variables": {
-                  "domainJoinUserName": "bennett",
-                  "domainFQDN": "batt.local",
-                  "domainJoinOptions": 3
+                  "extensionName": "[concat(parameters('vmName'), '/', 'joindomain')]"
                 },
                 "resources": [
                   {
                     "comments": "Join domain - JsonADDomainExtension",
                     "apiVersion": "2015-06-15",
                     "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "name": "[concat(parameters('vmName'),'/joindomain')]",
+                    "name": "[variables('extensionName')]",
                     "location": "[parameters('location')]",
                     "properties": {
                       "publisher": "Microsoft.Compute",
@@ -69,10 +77,10 @@
                       "typeHandlerVersion": "1.3",
                       "autoUpgradeMinorVersion": true,
                       "settings": {
-                        "Name": "[variables('domainFQDN')]",
-                        "User": "[variables('domainJoinUserName')]",
+                        "Name": "[parameters('domainFQDN')]",
+                        "User": "[concat(parameters('domainFQDN'), '\\' ,parameters('domainJoinUser'))]",
                         "Restart": "true",
-                        "Options": "[variables('domainJoinOptions')]"
+                        "Options": "[parameters('domainJoinOptions')]"
                       },
                       "protectedSettings": {
                         "Password": "[parameters('domainJoinSecret')]"
@@ -87,6 +95,12 @@
                 },
                 "location": {
                   "value": "[field('location')]"
+                },
+                "domainFQDN": {
+                  "value": "[parameters('domainFQDN')]"
+                },
+                "domainJoinUser": {
+                  "value": "[parameters('domainJoinUser')]"
                 },
                 "domainJoinSecret": {
                   "reference": {
@@ -107,21 +121,36 @@
         "type": "String",
         "metadata": {
           "displayName": "Image Resource Group Name",
-          "description": "The name of the resource group which contains approved images to domain join."
+          "description": "The name of the resource group which contains approved images to domain join.",
+          "strongType": "existingResourceGroups"
+        }
+      },
+      "domainFQDN": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Fully qualified Domain Name",
+          "description": "The FQDN of the domain to join servers to."
+        }
+      },
+      "domainJoinUser": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Domain User",
+          "description": "A user with credentials and access to join the domain."
         }
       },
       "keyVaultId": {
         "type": "String",
         "metadata": {
           "displayName": "Key Vault Id",
-          "description": "The full Resource Id for the Key Vault containing the domain join secret."
+          "description": "The full Resource Id for the Key Vault containing the domain user password."
         }
       },
       "secretName": {
         "type": "String",
         "metadata": {
           "displayName": "Secret Name",
-          "description": "The name of the secret inside the key vault which allows for domain join access."
+          "description": "The name of the secret inside the key vault which allows for domain user password."
         }
       }
     }

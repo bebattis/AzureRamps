@@ -1,0 +1,98 @@
+{
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "apiVersion": "2018-05-01",
+    "name": "DeployResourceGroupRBAC",
+    "properties": {
+      "policyType": "Custom",
+      "mode": "all",
+      "displayName": "Deploy RBAC on RGs",
+      "description": "This policy will deploy a Role Assignment for a User/Group/SPN to resource groups in scope.",
+      "metadata": {
+        "category": "RBAC"
+      },
+      "policyRule": {
+        "if": {
+          "field": "type",
+          "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+        },
+        "then": {
+          "effect": "deployIfNotExists",
+          "details": {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "existenceScope": "resourceGroup",
+            "existenceCondition": {
+              "allOf": [
+                {
+                  "field": "Microsoft.Authorization/roleAssignments/principalId",
+                  "equals": "[parameters('principalId')]"
+                },
+                {
+                  "field": "Microsoft.Authorization/roleAssignments/roleDefinitionId",
+                  "like": "[concat('*', parameters('roleDefinitionGuid'))]"
+                }
+              ]
+            },
+            "roleDefinitionIds": [
+              "/providers/microsoft.authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+            ],
+            "deployment": {
+              "properties": {
+                "mode": "incremental",
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                  "contentVersion": "1.0.0.0",
+                  "parameters": {
+                    "principalId": {
+                      "type": "string"
+                    },
+                    "roleDefinitionGuid": {
+                      "type": "string"
+                    }
+                  },
+                  "variables": {
+                    "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', parameters('roleDefinitionGuid'))]"
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Authorization/roleAssignments",
+                      "name": "[guid(resourceGroup().id, parameters('principalId'), variables('roleDefinitionId'))]",
+                      "apiVersion": "2017-10-01-preview",
+                      "properties": {
+                        "roleDefinitionId": "[variables('roleDefinitionId')]",
+                        "principalId": "[parameters('principalId')]",
+                        "scope": "[resourceGroup().id]"
+                      }
+                    }
+                  ]
+                },
+                "parameters": {
+                  "principalId": {
+                    "value": "[parameters('principalId')]"
+                  },
+                  "roleDefinitionGuid": {
+                    "value": "[parameters('roleDefinitionGuid')]"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": {
+        "principalId": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Principal Id",
+            "description": "The AAD Principal Id for a user, group, or spn."
+          }
+        },
+        "roleDefinitionGuid": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Role Definition Guid",
+            "description": "The Guid for the Role Definition to be assigned."
+          }
+        }
+      }
+    }
+  }

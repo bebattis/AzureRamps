@@ -41,8 +41,12 @@
         "effect": "append",
         "details": [
           {
-            "field": "Microsoft.Network/virtualNetworks/subnets/routeTable.id",
-            "value": "[parameters('udrId')]"
+            "field": "Microsoft.Compute/virtualMachines/diagnosticSettings",
+            "value": [
+              "bootDiagnostics": {
+              "enabled": boolean,
+              "storageUri": "string"
+            }]
           }
         ]
       }

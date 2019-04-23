@@ -1,0 +1,1 @@
+// Allow all traffic from Azure PIP inbound, also allow Azure VNET range inbound to box.

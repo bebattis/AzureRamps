@@ -1,0 +1,13 @@
+{
+    "type": "Microsoft.Blueprint/blueprints/artifacts",
+    "kind": "template",
+    "name": "<template-artifact-name>",
+    "properties": {
+        "displayName": "<Blueprint Artifact Description",
+        "description": "<Artifact Description>",
+        "template": {},
+        "parameters": {},
+        "dependsOn": [],
+        "resourceGroup": ""
+    }
+}

@@ -1,0 +1,152 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "defaultValue": "p001"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westus2"
+        },
+        "adminUser": {
+            "type": "string",
+            "defaultValue": "bennett"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        }
+    },
+    "variables": {
+        "naming": {
+            "vm": "[concat(parameters('prefix'),'-vm-rras')]",
+            "aset": "[concat(parameters('prefix'),'-vm-rras-aas')]",
+            "nic": "[concat(parameters('prefix'),'-vm-rras-nic')]",
+            "disk": "[concat(parameters('prefix'),'-vm-rras-osd')]",
+            "pip": "[concat(parameters('prefix'),'-vm-rras-pip')]"
+        },
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', concat(parameters('prefix'),'-vnet'), concat(parameters('prefix'),'-sub-gateway'))]",
+        "vmImageRef": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2016-Datacenter-Server-Core-smalldisk",
+            "version": "latest"
+        },
+        "vmSize": "Standard_DS2_v2"
+    },
+    "resources": [
+        {
+            "name": "[variables('naming').pip]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+        {
+            "name": "[variables('naming').nic]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('naming').pip]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAddressVersion": "IPv4",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "primary": true,
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('naming').pip)]"
+                            }
+                        }
+                    }
+                ],
+                "primary": true,
+                "enableIPForwarding": true
+            }
+        },
+        {
+            "name": "[variables('naming').aset]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2019-03-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "platformUpdateDomainCount": 5,
+                "platformFaultDomainCount": 3
+            },
+            "sku": {
+                "tier": "Standard"
+            }
+        },
+        {
+            "name": "[variables('naming').vm]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('naming').nic]",
+                "[variables('naming').aset]"
+            ],
+            "properties": {
+              "hardwareProfile": {
+                "vmSize": "[variables('vmSize')]"
+              },
+              "storageProfile": {
+                "imageReference": "[variables('vmImageRef')]",
+                "osDisk": {
+                  "osType": "Windows",
+                  "name": "[variables('naming').disk]",
+                  "caching": "None",
+                  "createOption": "FromImage"
+                }
+              },
+              "osProfile": {
+                "computerName": "[variables('naming').vm]",
+                "adminUsername": "[parameters('adminUser')]",
+                "adminPassword": "[parameters('adminPassword')]",
+                "windowsConfiguration": {
+                  "provisionVMAgent": true,
+                  "timeZone": "UTC"
+                }
+              },
+              "networkProfile": {
+                "networkInterfaces": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('naming').nic)]",
+                    "properties": {
+                      "primary": true
+                    }
+                  }
+                ]
+              },
+              "availabilitySet": {
+                "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('naming').aset)]"
+              }
+            },
+            "resources": []
+          }
+    ],
+    "outputs": {
+        "publicIpAddress": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIpAddresses', variables('naming').pip), '2018-08-01', 'Full').properties.IpAddress]"
+        },
+        "privateIpAddress": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('naming').nic), '2018-08-01' , 'Full').ipConfigurations[0].properties.privateIPAddress]"
+        }
+    }
+}

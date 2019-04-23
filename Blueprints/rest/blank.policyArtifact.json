@@ -1,0 +1,13 @@
+{
+    "type": "Microsoft.Blueprint/blueprints/artifacts",
+    "kind": "policyAssignment",
+    "name": "<policy-artifact-name>",
+    "properties": {
+        "displayName": "<Blueprint Artifact Description",
+        "description": "<Artifact Description>",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/<policy-defintion-id>",
+        "parameters": {},
+        "dependsOn": [],
+        "resourceGroup": ""
+    }
+}

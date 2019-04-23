@@ -1,0 +1,13 @@
+{
+    "type": "Microsoft.Blueprint/blueprints",
+    "name": "blankBluePrint",
+    "description": "",
+    "displayName": "",
+    "properties": {
+        "layout": {},
+        "parameters": {},
+        "resourceGroups": {},
+        "targetScope": {},
+        "versions": {}
+    }
+}

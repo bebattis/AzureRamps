@@ -1,0 +1,13 @@
+{
+    "type": "Microsoft.Blueprint/blueprints/artifacts",
+    "kind": "roleAssignment",
+    "name": "<role-artifact-name>",
+    "properties": {
+        "displayName": "<Blueprint Artifact Description",
+        "description": "<Artifact Description>",
+        "principalIds": [],
+        "roleDefinitionId": "",
+        "dependsOn": [],
+        "resourceGroup": ""
+    }
+}

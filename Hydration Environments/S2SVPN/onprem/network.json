@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "defaultValue": "p001"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westus2"
+        }
+    },
+    "variables": {
+        "naming": {
+            "vnet": "[concat(parameters('prefix'),'-vnet')]",
+            "gwsub": "[concat(parameters('prefix'),'-sub-gateway')]",
+            "app1sub": "[concat(parameters('prefix'),'-sub-app1')]",
+            "app2sub": "[concat(parameters('prefix'),'-sub-app2')]",
+            "app3sub": "[concat(parameters('prefix'),'-sub-app3')]"
+        },
+        "networking": {
+            "vnet": ["10.70.0.0/16"],
+            "gwsub": "10.70.0.0/24",
+            "app1sub": "10.70.1.0/24",
+            "app2sub": "10.70.2.0/24",
+            "app3sub": "10.70.3.0/24"
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('naming').vnet]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": "[variables('networking').vnet]"
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('naming').gwsub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').gwsub]"
+                        }
+                    },
+                    {
+                        "name": "[variables('naming').app1sub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').app1sub]"
+                        }
+                    },
+                    {
+                        "name": "[variables('naming').app2sub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').app2sub]"
+                        }
+                    },
+                    {
+                        "name": "[variables('naming').app3sub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').app3sub]"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "vnetCIDR": {
+            "type": "array",
+            "value": "[variables('networking').vnet]"
+        }
+    }
+}

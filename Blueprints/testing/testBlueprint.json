@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Blueprint/blueprints",
+            "name": "testBluePrint",
+            "apiVersion": "2018-11-01-preview",
+            "properties": {
+                "layout": {},
+                "parameters": {},
+                "resourceGroups": {
+                    "b004-rg-prod-wus": {
+                        "metadata": {
+                            "displayName": "sample resource group",
+                            "description": "Resource to contain sample artifacts."
+                        }
+                    }
+                },
+                "targetScope": "subscription",
+                "versions": {}
+            },
+            "resources": [
+                {
+                    "type": "artifacts",
+                    "kind": "policyAssignment",
+                    "name": "policyArtifact-01",
+                    "apiVersion": "2018-11-01-preview",
+                    "dependsOn": [
+                        "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/providers/Microsoft.Blueprint/blueprints/testBluePrint"
+                    ],
+                    "properties": {
+                        "displayName": "Policy Artifact 1",
+                        "description": "This is just a sample policy assignment",
+                        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7c5a74bf-ae94-4a74-8fcf-644d1e0e6e6f",
+                        "parameters": {},
+                        "template": {},
+                        "dependsOn": [],
+                        "resourceGroup": "b004-rg-prod-wus"
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}

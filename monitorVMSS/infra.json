@@ -1,0 +1,259 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "metadata": {
+                "description": "A prefix for naming conventions for all associated resources"
+            },
+            "defaultValue": "b005"
+        },
+        "location": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "networking": {
+            "vnet": "10.5.5.0/23",
+            "appgw": "10.5.5.0/26",
+            "webtier": "10.5.5.64/26",
+            "apptier": "10.5.5.128/25",
+            "datatier": "10.5.6.0/27"
+        },
+        "naming": {
+            "vnet": "[concat(parameters('prefix'),'-vnet')]",
+            "appgwsub": "[concat(parameters('prefix'),'-appgw-subnet')]",
+            "webtiersub": "[concat(parameters('prefix'),'-webtier-subnet')]",
+            "apptiersub": "[concat(parameters('prefix'),'-apptier-subnet')]",
+            "datatiersub": "[concat(parameters('prefix'),'-datatier-subnet')]",
+            "vmss": "[concat(parameters('prefix'),'-vmss')]"
+        },
+        "vmss": {
+            "sku": {
+                "name": "Standard_DS1_v2",
+                "tier": "Basic",
+                "capacity": 4
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('naming').vnet]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('networking').vnet]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('naming').appgwsub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').appgw]"
+                        }
+                    },
+                    {
+                        "name": "[variables('naming').webtiersub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').webtier]"
+                        }
+                    },
+                    {
+                        "name": "[variables('naming').apptiersub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').apptier]"
+                        }
+                    },
+                    {
+                        "name": "[variables('naming').datatiersub]",
+                        "properties": {
+                            "addressPrefix": "[variables('networking').datatier]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('naming').vmss]",
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2019-03-01",
+            "location": "[parameters('location')]",
+            "sku": "[variables('vmss').sku]",
+            "properties": {
+                "upgradePolicy": {
+                    "mode": "Automatic",
+                    "rollingUpgradePolicy": {
+                        "maxBatchInstancePercent": 20,
+                        "maxUnhealthyInstancePercent": 20,
+                        "maxUnhealthyUpgradedInstancePercent": 20,
+                        "pauseTimeBetweenBatches": "PT0S"
+                    },
+                    "automaticOSUpgradePolicy": {
+                        "enableAutomaticOSUpgrade": true,
+                        "disableAutomaticRollback": true
+                    }
+                },
+                "virtualMachineProfile": {
+                    "osProfile": {
+                        "computerNamePrefix": "[variables('naming').vmss]",
+                        "adminUsername": "[parameters('adminUsername')]",
+                        "adminPassword": "[parameters('adminPassword')]",
+                        "windowsConfiguration": {
+                            "provisionVMAgent": true,
+                            "enableAutomaticUpdates": true,
+                            "timeZone": "UTC"
+                        }
+                    },
+                    "storageProfile": {
+                        "imageReference": {
+                            "publisher": "Microsoft",
+                            "offer": "WindowsServer",
+                            "sku": "2016-Datacenter",
+                            "version": "latest"
+                        },
+                        "osDisk": {
+                            "name": "string",
+                            "caching": "string",
+                            "writeAcceleratorEnabled": boolean,
+                            "createOption": "string",
+                            "diffDiskSettings": {
+                                "option": "Local"
+                            },
+                            "diskSizeGB": "integer",
+                            "osType": "string",
+                            "image": {
+                                "uri": "string"
+                            },
+                            "vhdContainers": [
+                                "string"
+                            ],
+                            "managedDisk": {
+                                "storageAccountType": "string"
+                            }
+                        },
+                        "dataDisks": [
+                            {
+                                "name": "string",
+                                "lun": "integer",
+                                "caching": "string",
+                                "writeAcceleratorEnabled": boolean,
+                                "createOption": "string",
+                                "diskSizeGB": "integer",
+                                "managedDisk": {
+                                    "storageAccountType": "string"
+                                }
+                            }
+                        ]
+                    },
+                    "networkProfile": {
+                        "healthProbe": {
+                            "id": "string"
+                        },
+                        "networkInterfaceConfigurations": [
+                            {
+                                "id": "string",
+                                "name": "string",
+                                "properties": {
+                                    "primary": boolean,
+                                    "enableAcceleratedNetworking": boolean,
+                                    "networkSecurityGroup": {
+                                        "id": "string"
+                                    },
+                                    "dnsSettings": {
+                                        "dnsServers": [
+                                            "string"
+                                        ]
+                                    },
+                                    "ipConfigurations": [
+                                        {
+                                            "id": "string",
+                                            "name": "string",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "string"
+                                                },
+                                                "primary": boolean,
+                                                "publicIPAddressConfiguration": {
+                                                    "name": "string",
+                                                    "properties": {
+                                                        "idleTimeoutInMinutes": "integer",
+                                                        "dnsSettings": {
+                                                            "domainNameLabel": "string"
+                                                        },
+                                                        "ipTags": [
+                                                            {
+                                                                "ipTagType": "string",
+                                                                "tag": "string"
+                                                            }
+                                                        ],
+                                                        "publicIPPrefix": {
+                                                            "id": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "privateIPAddressVersion": "string",
+                                                "applicationGatewayBackendAddressPools": [
+                                                    {
+                                                        "id": "string"
+                                                    }
+                                                ],
+                                                "applicationSecurityGroups": [
+                                                    {
+                                                        "id": "string"
+                                                    }
+                                                ],
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "string"
+                                                    }
+                                                ],
+                                                "loadBalancerInboundNatPools": [
+                                                    {
+                                                        "id": "string"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                    "enableIPForwarding": boolean
+                                }
+                            }
+                        ]
+                    },
+                    "diagnosticsProfile": {
+                        "bootDiagnostics": {
+                            "enabled": boolean,
+                            "storageUri": "string"
+                        }
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "string",
+                                "properties": {
+                                    "publisher": "string",
+                                    "type": "string",
+                                    "typeHandlerVersion": "string",
+                                    "autoUpgradeMinorVersion": boolean,
+                                    "settings": {},
+                                    "protectedSettings": {},
+                                    "provisionAfterExtensions": [
+                                        "string"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "licenseType": "string",
+                    "priority": "string",
+                    "evictionPolicy": "string"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

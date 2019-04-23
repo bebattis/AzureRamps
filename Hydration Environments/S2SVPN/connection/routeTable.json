@@ -1,0 +1,1 @@
+//udr points all non-gateway subnets on-prem to next hop for azure vnet through the private ip of the NVA

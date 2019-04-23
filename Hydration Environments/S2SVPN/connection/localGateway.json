@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "defaultValue": "p001"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westus2"
+        },
+        "onPremCIDRs": {
+            "type": "array",
+            "metadata": {
+                "description": "An array of all on-prem CIDR ranges to be used in the local gateway."
+            }
+        },
+        "localPIP": {
+            "type": "string",
+            "metadata": {
+                "description": "The value of the local Public IP Address for you VPN Gateway Router."
+            }
+        }
+    },
+    "variables": {
+        "naming": {
+            "lng": "[concat(parameters('prefix'),'-lng')]"
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('naming').lng]",
+            "type": "Microsoft.Network/localNetworkGateways",
+            "apiVersion": "2018-11-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "localNetworkAddressSpace": {
+                    "addressPrefixes": "[parameters('onPremCIDRs')]"
+                },
+                "gatewayIpAddress": "[parameters('localPIP')]"
+            }
+        }
+    ],
+    "outputs": {
+        "lngRef": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Network/localNetworkGateways', variables('naming').lng)]"
+        }
+    }
+}

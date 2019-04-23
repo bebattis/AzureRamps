@@ -1,0 +1,66 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "azurePrefix": {
+            "type": "string"
+        },
+        "localPrefix": {
+            "type": "string",
+            "defaultValue": "p001"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westus2"
+        },
+        "vpnRef": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource Id of the VPN gateway object"
+            }
+        },
+        "lngRef": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource Id of the Local Network Gateway object"
+            }
+        },
+        "sharedKey": {
+            "type": "string",
+            "metadata": {
+                "description": "The pre-shared key which will be used for the VPN tunnel connection."
+            }
+        }
+    },
+    "variables": {
+        "naming": {
+            "connection": "[concat(parameters('azurePrefix'), '-to-', parameters('localPrefix'))]"
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('naming').connection]",
+            "type": "Microsoft.Network/connections",
+            "apiVersion": "2018-11-01",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "properties": {
+                "virtualNetworkGateway1": {
+                    "id": "[parameters('vpnRef')]"
+                },
+                "localNetworkGateway2": {
+                    "id": "[parameters('lngRef')]"
+                }
+            },
+            "connectionType": "IPsec",
+            "connectionProtocol": "IKEv2",
+            "routingWeight": "0",
+            "sharedKey": "[parameters('sharedKey')]",
+            "enableBgp": false,
+            "usePolicyBasedTrafficSelectors": false,
+            "ipsecPolicies": [],
+            "expressRouteGatewayBypass": false
+        }
+    ],
+    "outputs": {}
+}

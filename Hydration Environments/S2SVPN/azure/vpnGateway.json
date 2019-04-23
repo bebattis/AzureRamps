@@ -1,0 +1,85 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string",
+            "defaultValue": "b001"
+        },
+        "location": {
+            "type": "string"
+        },
+        "vnetName": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "naming": {
+            "pip": "[concat(parameters('prefix'), '-gw-pip')]",
+            "vpnGW": "[concat(parameters('prefix'), '-vpngw')]"
+        },
+        "gatewaySku": {
+            "name": "VpnGw1",
+            "tier": "VpnGw1",
+            "capacity": 1
+        },
+        "pipSku": "Basic",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), 'GatewaySubnet')]"
+    },
+    "resources": [
+        {
+            "name": "[variables('naming').pip]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[variables('pipSku')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "publicIPAddressVersion": "IPv4"
+            }
+        },
+        {
+            "name": "[variables('naming').vpnGW]",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "apiVersion": "2018-08-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('naming').pip]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "vnetGatewayConfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('naming').pip)]"
+                            }
+                        }
+                    }
+                ],
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "enableBgp": false,
+                "activeActive": false,
+                "sku": "[variables('gatewaySku')]",
+                "vpnClientConfiguration": {
+                    "vpnClientProtocols": [
+                        "IkeV2"
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "vpnRef": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('naming').vpnGW)]"
+        }
+    }
+}

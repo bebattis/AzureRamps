@@ -1,1 +1,94 @@
-//udr points all non-gateway subnets on-prem to next hop for azure vnet through the private ip of the NVA
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westus2"
+        },
+        "azureVNetCIDR": {
+            "type": "array",
+            "metadata": {
+                "description": "List of CIDR Addresses for Azure Virtual Networking Space."
+            }
+        },
+        "rrasPrivateIP": {
+            "type": "string",
+            "metadata": {
+                "description": "The private IP address of the windows RRAS box."
+            }
+        },
+        "onPremVNetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the 'on-prem' virtual network name."
+            }
+        },
+        "onPremSubnetNames": {
+            "type": "array",
+            "metadata": {
+                "description": "The list of the 'on-prem' subnet names."
+            }
+        },
+        "onPremSubnetCIDRs": {
+            "type": "array",
+            "metadata": {
+                "description": "The corresponding list of the 'on-prem subnet CIDRs."
+            }
+        }
+    },
+    "variables": {
+        "naming": {
+            "udr": "[concat(parameters('prefix'), '-udr')]"
+        },
+        "copy": [
+            {
+                "name": "routeRefs",
+                "count": "[length(parameters('azureVNetCIDR'))]",
+                "input": {
+                    "name": "[concat('AzureCIDR', copyIndex('routeRefs', 1))]",
+                    "properties": {
+                        "addressPrefix": "[parameters('azureVNetCIDR')[copyIndex('routeRefs')]]",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "[parameters('rrasPrivateIP')]"
+                    }
+                }
+            }
+        ]
+    },
+    "resources": [
+        {
+            "name": "[variables('naming').udr]",
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2018-11-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "routes": "[variables('routeRefs')]",
+                "disableBgpRoutePropagation": true
+            }
+        },
+        {
+            "name": "[concat(parameters('onPremVNetName'), '/', parameters('onPremSubnetNames')[copyIndex()])]",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2018-11-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('naming').udr]"
+            ],
+            "copy": {
+                "name": "UpdateSubnets",
+                "count": "[length(parameters('onPremSubnetNames'))]",
+                "mode": "Serial"
+            },
+            "properties": {
+                "addressPrefix": "[parameters('onPremSubnetCIDRs')[copyIndex()]]",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', variables('naming').udr)]"
+                }
+            }
+        }
+    ]
+}

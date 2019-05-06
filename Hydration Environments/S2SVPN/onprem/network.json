@@ -67,6 +67,10 @@
         }
     ],
     "outputs": {
+        "vnetName": {
+            "type": "string",
+            "value": "[variables('naming').vnet]"
+        },
         "vnetCIDR": {
             "type": "array",
             "value": "[variables('networking').vnet]"

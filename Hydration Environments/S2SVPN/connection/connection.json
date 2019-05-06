@@ -43,23 +43,22 @@
             "type": "Microsoft.Network/connections",
             "apiVersion": "2018-11-01",
             "location": "[parameters('location')]",
-            "tags": {},
             "properties": {
                 "virtualNetworkGateway1": {
                     "id": "[parameters('vpnRef')]"
                 },
                 "localNetworkGateway2": {
                     "id": "[parameters('lngRef')]"
-                }
-            },
-            "connectionType": "IPsec",
-            "connectionProtocol": "IKEv2",
-            "routingWeight": "0",
-            "sharedKey": "[parameters('sharedKey')]",
-            "enableBgp": false,
-            "usePolicyBasedTrafficSelectors": false,
-            "ipsecPolicies": [],
-            "expressRouteGatewayBypass": false
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "IKEv2",
+                "routingWeight": "0",
+                "sharedKey": "[parameters('sharedKey')]",
+                "enableBgp": false,
+                "usePolicyBasedTrafficSelectors": false,
+                "ipsecPolicies": [],
+                "expressRouteGatewayBypass": false
+            }
         }
     ],
     "outputs": {}

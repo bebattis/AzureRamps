@@ -1,0 +1,39 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "name": "testvnet3",
+            "location": "westus2",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.35.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.35.0.0/24",
+                            "networkSecurityGroup": {
+                                "id": "/subscriptions/05a8ce49-6e67-40bd-a307-2c090be1b015/resourceGroups/b013-nsgpolicytesting/providers/Microsoft.Network/networkSecurityGroups/testnsg"
+                            }
+                        }
+                    },
+                    {
+                        "name": "default2",
+                        "properties": {
+                            "addressPrefix": "10.35.1.0/24"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}
